@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
-    "ejs": "^2.5.6"
+    "ejs": "^2.5.6",
+    "mongodb": "^2.2.25"
   },
   "devDependencies": {},
   "scripts": {
