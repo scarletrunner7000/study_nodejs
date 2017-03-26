@@ -1,37 +1,37 @@
 var http = require('http'),
     fs = require('fs'),
-    ejs = require('ejs');
+    ejs = require('ejs'),
+    qs = require('querystring');
 var settings = require('./settings');
 console.log(settings);
 var server = http.createServer();
-var template = fs.readFileSync(__dirname + '/public_html/hello.ejs', 'utf-8');
+var template = fs.readFileSync(__dirname + '/public_html/bbs.ejs', 'utf-8');
+var posts = [];
 
-var n = 0;
+function renderForm(posts, res) {
+  var data = ejs.render(template, {
+    posts: posts,
+  });
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.write(data);
+  res.end();
+}
+
 server.on('request', function(req, res) {
-  n++;
-  switch (req.url) {
-    case '/about':
-      var data = ejs.render(template, {
-        title: "Hello",
-        content: "<strong>World!</strong>",
-        n: n,
-      });
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.write(data);
-      res.end();
-      break;
-    case '/profile':
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.write("about me");
-      res.end();
-      break;
-    default:
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.write("wrong page");
-      res.end();
-      break;
+  if (req.method === 'POST') {
+    req.data = "";
+    req.on("readable", function() {
+      req.data += req.read();
+    });
+    req.on("end", function() {
+      var query = qs.parse(req.data);
+      console.log(query);
+      posts.push(query.name);
+      renderForm(posts, res);
+    });
+  } else {
+    renderForm(posts, res);
   }
-
 });
 server.listen(settings.port, settings.host);
 console.log("server listening ...");
